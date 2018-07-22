@@ -33,6 +33,7 @@ export default class App extends Component {
     };
     this.animatedValue = new Animated.Value(width)
 
+    this.renderTransitionScene = this.renderTransitionScene.bind(this);
     this.renderScene = this.renderScene.bind(this);
     this.renderNavigator = this.renderNavigator.bind(this);
     this.pushView = this.pushView.bind(this);
@@ -53,22 +54,13 @@ export default class App extends Component {
       name: name
     });
 
-    Animated.timing(
-      this.animatedValue,
-      {
-        toValue: 0 - width,
-        duration: 300,
-        easing: Easing.linear
-      }
-    ).start(() => {
-      this.setState({ views: pushThis });
-    })
+    this.setState({ views: pushThis, isTransition: true });
   }
 
   goBack() {
     deleteView = this.state.views;
     deleteView.pop();
-    this.setState({ views: deleteView });
+    this.setState({ views: deleteView, isGoBack: true, isTransition: true });
   }
 
   renderNavigator() {
@@ -119,6 +111,7 @@ export default class App extends Component {
       pushView: this.pushView,
       props: {} //Cannot set here.
     });
+
     return (
       <elementInstance.type
         ref="current"
@@ -128,16 +121,30 @@ export default class App extends Component {
     );
   }
 
-  render() {
-    this.animatedValue.setValue(width);
+  renderTransitionScene() {
+    let toValue = 0 - width
+
+    if (this.state.isGoBack) {
+      toValue = 0
+      this.animatedValue.setValue(0 - width);
+    } else {
+      this.animatedValue.setValue(0);
+    }
+
     Animated.timing(
       this.animatedValue,
       {
-        toValue: 0,
+        toValue: toValue,
         duration: 300,
         easing: Easing.linear
       }
-    ).start()
+    ).start(() => {
+      this.setState({isTransition: false, isGoBack: false})
+    })
+
+    this.newComponent = this.renderScene()
+
+
     return (
       <Animated.View
       style={{
@@ -145,17 +152,48 @@ export default class App extends Component {
         top: 0,
         bottom: 0,
         left: this.animatedValue,
-        width: '100%',
-        backgroundColor: 'red'}} >
-        <View style={styles.container}>
+        width: '100%',}} >
+        <View style={{position: 'absolute', top: 0, bottom: 0, left: 0, width: '100%'}}>
           {this.renderNavigator()}
           <View style={styles.componentContainer}>
-            {this.renderScene()}
+            {this.state.isGoBack ? this.newComponent : this.currentComponent}
+          </View>
+        </View>
+        <View style={{position: 'absolute', top: 0, bottom: 0, left: width, width: '100%'}}>
+          {this.renderNavigator()}
+          <View style={styles.componentContainer}>
+            {this.state.isGoBack ? this.currentComponent : this.newComponent}
           </View>
         </View>
       </Animated.View>
 
     );
+
+  }
+
+  render() {
+    this.animatedValue.setValue(width);
+
+    if (!this.currentComponent) {
+      this.currentComponent = this.renderScene()
+    }
+ 
+    if (this.state.isTransition) {
+      return this.renderTransitionScene()
+    } else {
+      if (this.newComponent) {
+        this.currentComponent = this.newComponent
+      }
+      return (
+        <View style={styles.container}>
+          {this.renderNavigator()}
+          <View style={styles.componentContainer}>
+            {this.currentComponent}
+          </View>
+        </View>
+      );
+    }
+
   }
 }
 
