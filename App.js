@@ -10,6 +10,8 @@ import {
   Text,
   View,
   Navigator,
+  Animated,
+  Easing,
   TouchableHighlight,
   Dimensions
 } from "react-native";
@@ -23,6 +25,8 @@ export default class App extends Component {
       views: [],
       currentCount: 0
     };
+    this.animatedValue = new Animated.Value(width)
+
     this.renderScene = this.renderScene.bind(this);
     this.renderNavigator = this.renderNavigator.bind(this);
     this.pushView = this.pushView.bind(this);
@@ -112,16 +116,37 @@ export default class App extends Component {
   }
 
   render() {
+    this.animatedValue.setValue(width);
+    Animated.timing(
+      this.animatedValue,
+      {
+        toValue: 0,
+        duration: 300,
+        easing: Easing.linear
+      }
+    ).start()
     return (
-      <View style={styles.container}>
-        {this.renderNavigator()}
-        <View style={styles.componentContainer}>
-          {this.renderScene()}
+      <Animated.View
+      style={{
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: this.animatedValue,
+        width: '100%',
+        backgroundColor: 'red'}} >
+        <View style={styles.container}>
+          {this.renderNavigator()}
+          <View style={styles.componentContainer}>
+            {this.renderScene()}
+          </View>
         </View>
-      </View>
+      </Animated.View>
+
     );
   }
 }
+
+var { width, height } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {
