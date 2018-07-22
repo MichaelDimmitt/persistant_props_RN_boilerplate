@@ -165,12 +165,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold"
   },
   rightNavButtonText: {
-    color: "#FFF",
+    color: "#000",
     fontSize: 24,
     marginRight: 20
   },
   leftNavButtonText: {
-    color: "#FFF",
+    color: "#000",
     fontSize: 24,
     marginLeft: 20
   },
