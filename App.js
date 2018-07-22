@@ -22,7 +22,13 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      views: [],
+      views: [
+        {
+        Component: Home,
+        props: {},
+        name: 'Home'
+      }
+    ],
       currentCount: 0
     };
     this.animatedValue = new Animated.Value(width)
@@ -31,10 +37,6 @@ export default class App extends Component {
     this.renderNavigator = this.renderNavigator.bind(this);
     this.pushView = this.pushView.bind(this);
     this.goBack = this.goBack.bind(this);
-  }
-
-  componentWillMount() {
-    this.pushView(Home, {}, "Home");
   }
 
   pushView(view, props, name) {
@@ -50,7 +52,17 @@ export default class App extends Component {
       props: props,
       name: name
     });
-    this.setState({ views: pushThis });
+
+    Animated.timing(
+      this.animatedValue,
+      {
+        toValue: 0 - width,
+        duration: 300,
+        easing: Easing.linear
+      }
+    ).start(() => {
+      this.setState({ views: pushThis });
+    })
   }
 
   goBack() {
@@ -70,7 +82,8 @@ export default class App extends Component {
             >
               <Text style={styles.leftNavButtonText}>{"<"}</Text>
             </TouchableHighlight>
-          : <Text style={styles.leftNavButtonText}>{"  "}</Text>}
+          : <Text style={styles.leftNavButtonText}>{"  "}</Text>
+        }
         <View style={styles.titleView}>
           <Text style={styles.title}>{currentView.name}</Text>
         </View>
